@@ -969,7 +969,7 @@ fn main() {
         println!("mixed_type.x = {:?}, mixed_type.y = {:?}", mixed_type.x, mixed_type.y);
 } */
 
-pub trait Summary {
+/* pub trait Summary {
         fn summarize_author(&self) -> String;
         fn summarize(&self) -> String{
                 format!("(Read more from {}...)", self.summarize_author())
@@ -996,7 +996,7 @@ impl Summary for Tweet {
         fn summarize_author(&self) -> String { 
                 format!("@{}", self.username)
         }
-}
+} */
 //pub fn notify1(item1: impl Summary, item2: impl Summary){}    //可以使用不同的类型
 //pub fn notify2<T: Summary>(item1: T, item2: T){}              //强迫二者为相同的类型
 //pub fn notify<T: Summary + Display>(item: T){}                //指定多个trait
@@ -1006,7 +1006,7 @@ impl Summary for Tweet {
 {
 
 } */
-fn main() {
+/* fn main() {
         let article = NewsArticle {
                 headline: String::from ("Penguins win the Stanley Cup Championship!"),
                 location: String::from ("Pittsburgh, PA, USA"),
@@ -1021,4 +1021,184 @@ fn main() {
         };
         //println!("New article available! {}", article.summarize());
         println!("A new tweet: {}", tweet.summarize());
+} */
+/* fn reset(mut arr: [u32; 5]) {
+        arr[0] = 5;
+        arr[1] = 4;
+        arr[2] = 3;
+        arr[3] = 2;
+        arr[4] = 1;
+        println!("reset arr is {:?}", arr);
 }
+fn main() {
+        let arr: [u32; 5] = [1, 2, 3, 4, 5];
+        reset(arr);
+        println!("origin arr is {:?}", arr); //实现了Copy trait，所以没有影响原来的数组
+} */
+/* fn reset(arr: &mut [u32]) {
+        arr[0] = 5;
+        arr[1] = 4;
+        arr[2] = 3;
+        arr[3] = 2;
+        arr[4] = 1;
+        println!("reset arr is {:?}", arr);
+        println!("reset array length {:?}", arr.len()); //包含了长度信息
+}
+fn main() {
+        let mut arr = [1, 2, 3, 4, 5];
+        println!("reset before: origin array {:?}", arr);
+        {
+                let mut_arr: &mut[u32] = &mut arr;
+                reset(mut_arr);
+        }
+        println!("reset after: origin array {:?}", arr); //将引用当作函数参数，被修改的是原数组
+        println!("mem size of &[u32; 5] is {:?}", std::mem::size_of::<[u32;5]>());  //8
+        println!("mem size of &mut [u32] is {:?}", std::mem::size_of::<&mut [u32]>()); //16
+} */
+/* use std::mem::size_of;
+enum Void{}
+struct Foo;
+struct Baz {
+        _foo: Foo, 
+        _qux: (),
+        _baz: [u8; 0],
+}
+fn main() {
+        println!("{:?}, {:?}, {:?}, {:?}, {:?}", size_of::<()>(), size_of::<Foo>(), size_of::<Baz>(), size_of::<Void>(), size_of::<[(); 10]>());
+} */
+/* #![feature(never_type)]
+fn foo() -> ! {
+        //...
+        loop{ println!("repeat!"); }
+}
+fn main() {
+        let i = if false{
+                foo();
+        } else {
+                100
+        };
+        assert_eq!(i, 100);
+} */
+/* enum Void{}
+fn main() {
+        let res: Result<u32, Void> = Ok(0);
+        if let Ok(num) = res{
+        }
+} */
+/* fn sum(a: u32, b: i32) -> u32 {
+        a+ (b as u32)
+}
+fn main() {
+        let a = 1;
+        let b = 2;
+        println!("{:?}", sum(a, b)); //3
+        let elem = 5u8;
+        let mut vec = Vec::new();
+        vec.push(elem);
+        println!("{:?}", vec); //[5]
+} */
+/* fn main() {
+        let x = "1";
+        let int_x: i32 = x.parse().unwrap();
+        assert_eq!(int_x, 1);
+        assert_eq!(x.parse::<i32>().unwrap(), 1); // ::<> 操作符形式称为turbofish操作符
+} */
+/* fn foo<T>(x:T) -> T{
+        return x
+}
+fn main() {
+        assert_eq!(foo(1), 1);
+        assert_eq!(foo("hello"), "hello");
+} */
+/* #[derive(Debug)]
+struct Point<T> {x:T, y:T}
+impl<T> Point<T>{
+        fn new(x:T, y:T) -> Self {
+                Point{x:x, y:y}
+        }
+}
+fn main() {
+        let point1 = Point::new(1, 2);
+        let point2 = Point::new("1", "2");
+        println!("{:?}", point1);
+        println!("{:?}", point2);
+} */
+/* #[derive(Debug, PartialEq)]
+struct Foo(i32);
+#[derive(Debug, PartialEq)]
+struct Bar(i32, i32);
+trait Inst {
+        fn new(i32) -> Self;
+}
+impl Inst for Foo {
+        fn new(i: i32) -> Foo {
+                Foo(i)
+        }
+}
+impl Inst for Bar {
+        fn new(i: i32) -> Bar {
+                Bar(i, i+10)
+        }
+}
+fn foobar<T: Inst>(i:i32) -> T {
+        T::new(i)
+}
+fn main() {
+        let f: Foo = foobar(10);
+        println!("{:?}", f); //Foo(10)
+        let b: Bar = foobar(10);
+        println!("{:?}", b); //Bar(10, 20)
+} */
+/* trait Add<RHS, Output> {
+        fn my_add(self, rhs: RHS) -> Output;
+}
+impl Add<i32, i32> for i32 {
+        fn my_add(self, rhs: i32) -> i32 {
+                self + rhs
+        }
+}
+impl Add<u32, i32> for u32 {
+        fn my_add(self, rhs: u32) -> i32 {
+                (self + rhs) as i32
+        }
+}
+fn main() {
+        let (a, b, c, d) = (1i32, 2i32, 3u32, 4u32);
+        let x: i32 = a.my_add(b);
+        let y: i32 = c.my_add(d);
+        println!("{:?}", x); //3i32
+        println!("{:?}", y); //7i32
+} */
+/* pub trait Add<RHS = Self> { //Self为trait自带的隐式类型参数， 代表实现当前trait的具体类型
+        type Output; //关联类型
+        fn add(self, rhs: RHS) -> Self::Output;
+}
+impl Add for u32 {
+        type Output = u32;
+        fn add(self, other: u32) -> u32 {self + other}
+}
+impl Add<&str> for String { //标准库中为String类型实现Add trait //加号右侧为&str类型，Output为String类型
+        type Output = String;
+        fn add(mut self, other: &str) -> String{
+                self.push_str(other);
+                self
+        }
+}
+fn main() {
+        let a = "Hello,";
+        let b = " world! ";
+        let c = a.to_string() + b;
+        println!("{:?}", c);
+} */
+/* use std::ops::Add;
+impl Add<u64> for u32 { //孤儿规则，trait和实现该trait的类型至少有一个要在当前crate中定义
+        type Output = u64;
+        fn add(self, other: u64) -> Self:: Output {
+                (self as u64) + other
+        }
+}
+fn main() {
+        let a = 1u32;
+        let b = 2u64;
+        assert_eq!(a+ b, 3);
+} */
