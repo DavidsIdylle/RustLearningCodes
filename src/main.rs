@@ -1190,8 +1190,12 @@ fn main() {
         let c = a.to_string() + b;
         println!("{:?}", c);
 } */
-/* use std::ops::Add;
-impl Add<u64> for u32 { //孤儿规则，trait和实现该trait的类型至少有一个要在当前crate中定义
+/* //use std::ops::Add;
+trait Add<RHS = Self> {
+        type Output;
+        fn add(self, rhs: RHS) -> Self::Output;
+}
+impl Add<u64> for u32 { //孤儿规则Orphan Rule，trait和实现该trait的类型至少有一个要在当前crate中定义
         type Output = u64;
         fn add(self, other: u64) -> Self:: Output {
                 (self as u64) + other
@@ -1200,5 +1204,37 @@ impl Add<u64> for u32 { //孤儿规则，trait和实现该trait的类型至少�
 fn main() {
         let a = 1u32;
         let b = 2u64;
-        assert_eq!(a+ b, 3);
+        //assert_eq!(a+ b, 3);
+        assert(a.add(b), 3);
 } */
+/* use std::ops::Add;
+#[derive(Debug)]
+struct Point {
+        x: i32, y:i32,
+}
+impl Add for Point {
+        type Output = Point; //关联类型必须指定具体类型
+        fn add(self, other: Point) -> Point {  //add的返回类型可以写Point，也可以写Self
+                Point{
+                        x: self.x + other.y,
+                        y: self.y + other.x,
+                }
+        }
+}
+fn main() {
+        println!("{:?}", Point{x: 5, y: 7} + Point{x: 2, y: 6}); //Point{x: 11, y: 9}
+} */
+fn longest<'a >(x: &'a str, y: &'a str) -> &'a str {
+        if x.len() > y.len() {
+                x
+        } else {
+                y
+        }
+}
+//不能确定哪个分支会得到执行，所以无法通过分析作用域来确定返回的引用是否有效
+fn main() {
+        let string1 = String::from("abcd");
+        let string2 = "xyz";
+        let result = longest(string1.as_str(), string2);
+        println!("The longest string is {:?}", result);
+}
