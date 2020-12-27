@@ -1266,6 +1266,6 @@ fn longest_with_an_announcement<'a, T>(x: &'a str, y:&'a str, ann: T) -> &'a str
         } else {
                 y
         }
-}
-fn main() {
 } */
+fn main() {
+} 
