@@ -1224,7 +1224,11 @@ impl Add for Point {
 fn main() {
         println!("{:?}", Point{x: 5, y: 7} + Point{x: 2, y: 6}); //Point{x: 11, y: 9}
 } */
-fn longest<'a >(x: &'a str, y: &'a str) -> &'a str {
+/* fn longest<'a >(x: &'a str, y: &'a str) -> &'a str { //生命周期标记 &'a 
+        //指定生命周期参数时，并没有改变生命周期，只是向借用检查器指出了可用于检查非法调用的约束
+        //泛型生命周期'a会被具体化为x与y两者中较短的那个生命周期
+        //返回类型的生命周期参数必须与其中一个参数的生命周期参数相匹配
+        //当返回的引用没有指向任何参数时，即指向函数内部创建的值，那么返回的内容也就成了悬垂引用
         if x.len() > y.len() {
                 x
         } else {
@@ -1237,4 +1241,31 @@ fn main() {
         let string2 = "xyz";
         let result = longest(string1.as_str(), string2);
         println!("The longest string is {:?}", result);
+} */
+/* #[derive(Debug)]
+struct ImportantExcerpt<'a> {
+        part: &'a str,
 }
+fn main() {
+        let novel = String::from("Call me Ishmael. Some years ago...");
+        let first_sentence = novel.split('.').next().expect("Could not find a '.'");
+        let i = ImportantExcerpt { part: first_sentence };
+        println!("{:?}", i);
+} */
+//计算引用生命周期的三条规则：
+//1. 每一个引用参数都会拥有自己的生命周期参数
+//2. 当只存在一个输入生命周期参数时，这个生命周期会被赋予给所有输出参数
+//3. 多个输入生命周期参数中其中一个是&self或&mut self，self的生命周期会被赋给所有输出参数（方法签名）
+//特殊的生命周期&'static ，表示整个程序的执行期
+/* use std::fmt::Display;
+fn longest_with_an_announcement<'a, T>(x: &'a str, y:&'a str, ann: T) -> &'a str where T: Display{ //生命周期也是泛型的一种
+        println!("Announcement! {}", ann);
+        if x.len() > y.len()
+        {
+                x
+        } else {
+                y
+        }
+}
+fn main() {
+} */
