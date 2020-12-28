@@ -1,1 +1,1 @@
-D:\DataFiles\CodesLearning\RUST\Instances\minigrep\target\debug\minigrep.exe: D:\DataFiles\CodesLearning\RUST\Instances\minigrep\src\main.rs
+D:\DataFiles\CodesLearning\RUST\Instances\minigrep\target\debug\minigrep.exe: D:\DataFiles\CodesLearning\RUST\Instances\minigrep\src\lib.rs D:\DataFiles\CodesLearning\RUST\Instances\minigrep\src\main.rs
