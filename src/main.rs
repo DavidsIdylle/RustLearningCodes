@@ -2,11 +2,10 @@
    /*println!("Hello World!");
     println!("{} days", 31);
     println!("{0}, this is {1}, {1}, this is {0}","Alice","Bob");
-    
     println!("{subject} {verb} {object}",
-            object="the lazy dog",
-            subject="the quick brown fox", 
-            verb="jump over");
+        object="the lazy dog",
+        subject="the quick brown fox",
+        verb="jump over");
 
         println!("{} of {:b} people know binary, the other half dosen't",1,2);
     println!("{number:>width$}",number=1, width=6);
@@ -21,161 +20,161 @@
 }
 #[derive(Debug)]
 struct Person<'a>{
-        name: &'a str,
-        age:u8
+    name: &'a str,
+    age:u8
 }
 fn main(){
-        let name = "Peter";
-        let age = 27;
-        let peter = Person{name, age};
-        println!("{:#?}", peter);
+    let name = "Peter";
+    let age = 27;
+    let peter = Person{name, age};
+    println!("{:#?}", peter);
 }*/
 /*use std::fmt;
 #[derive(Debug)]
 struct Vector2D{
-        x:isize,
-        y:isize,
+    x:isize,
+    y:isize,
 }
 impl fmt::Display for Vector2D{
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
-                write!(f, "({}, {})", self.x, self.y)
-        }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+        write!(f, "({}, {})", self.x, self.y)
+    }
 }
 impl fmt::Binary for Vector2D{
-        fn fmt(&self, f: &mut fmt::Formatter) ->fmt::Result{
-                let magnitude = (self.x * self.x + self.y * self.y) as f64;
-                let magnitude = magnitude.sqrt();
+    fn fmt(&self, f: &mut fmt::Formatter) ->fmt::Result{
+        let magnitude = (self.x * self.x + self.y * self.y) as f64;
+        let magnitude = magnitude.sqrt();
 
-                let decimals = f.precision().unwrap_or(3);
-                let string = format!("{:.*}", decimals, magnitude);
-                f.pad_integral(true, "", &string)
-        }
+        let decimals = f.precision().unwrap_or(3);
+        let string = format!("{:.*}", decimals, magnitude);
+        f.pad_integral(true, "", &string)
+    }
 }
 fn main() {
-        let myvector = Vector2D{x:3, y:4};
-        println!("{}", myvector);
-        println!("{:?}", myvector);
-        println!("{:10.3b}", myvector);
+    let myvector = Vector2D{x:3, y:4};
+    println!("{}", myvector);
+    println!("{:?}", myvector);
+    println!("{:10.3b}", myvector);
 }*/
 /*use std::fmt;
 #[derive(Debug)]
 struct MinMax(i64, i64);
 impl fmt::Display for MinMax{
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, "({}, {})", self.0, self.1)
-        }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.0, self.1)
+    }
 }
 #[derive(Debug)]
 struct Point2D{
-        x:f64,
-        y:f64,
+    x:f64,
+    y:f64,
 }
 impl fmt::Display for Point2D{
-        fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result{
-                write!(f, "x:{}, y:{}", self.x, self.y)
-        }
+    fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result{
+        write!(f, "x:{}, y:{}", self.x, self.y)
+    }
 }
 #[derive(Debug)]
 struct Complex{
-        real:f64,
-        imag:f64,
+    real:f64,
+    imag:f64,
 }
 impl fmt::Display for Complex{
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
-                write!(f, "{} + {}i", self.real, self.imag)
-        }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+        write!(f, "{} + {}i", self.real, self.imag)
+    }
 }
 fn main() {
-        let minmax = MinMax(0,14);
+    let minmax = MinMax(0,14);
 
-        println!("Compare Structures:");
-        println!("Display:{}",minmax);
-        println!("Debug:{:?}", minmax);
+    println!("Compare Structures:");
+    println!("Display:{}",minmax);
+    println!("Debug:{:?}", minmax);
 
-        let big_range = MinMax(-300, 300);
-        let small_range = MinMax(-3, 3);
-        
-        println!("The big range is {big} and the small is {small}", 
-        small = small_range,
-        big = big_range);
+    let big_range = MinMax(-300, 300);
+    let small_range = MinMax(-3, 3);
 
-        let point = Point2D{x:3.3, y:7.2};
-        println!("Compare points:");
-        println!("Display:{}", point);
-        println!("Debug:{:?}", point);
+    println!("The big range is {big} and the small is {small}",
+    small = small_range,
+    big = big_range);
 
-        let complex = Complex{real:3.3, imag:7.2};
-        println!("Compare complex:");
-        println!("Display:{}", complex);
-        println!("Debug:{:?}", complex);
+    let point = Point2D{x:3.3, y:7.2};
+    println!("Compare points:");
+    println!("Display:{}", point);
+    println!("Debug:{:?}", point);
+
+    let complex = Complex{real:3.3, imag:7.2};
+    println!("Compare complex:");
+    println!("Display:{}", complex);
+    println!("Debug:{:?}", complex);
 }*/
-/*fn main() {
-        /*pub fn answer() ->(){
-                let a = 4;
-                let b = 2;
-                assert_eq!(sum(a,b),6);
-        }
-        pub fn sum(a:i32, b:i32)->i32{
-                a + b
-        }
-        answer();*/
+/* fn main() {
+    /*pub fn answer() ->(){
+        let a = 4;
+        let b = 2;
+        assert_eq!(sum(a,b),6);
+    }
+    pub fn sum(a:i32, b:i32)->i32{
+        a + b
+    }
+    answer();*/
 
-        /*let a = [1,2,3];
-        let b = &a;
-        println!("{:p}",b);
-        let mut c = vec![1,2,3];
-        let d = &mut c;
-        d.push(4);
-        println!("{:?}",d);
-        let e = &42;
-        assert_eq!(42, *e);*/
+    /* let a = [1,2,3];
+    let b = &a;
+    println!("{:p}",b);
+    let mut c = vec![1,2,3];
+    let d = &mut c;
+    d.push(4);
+    println!("{:?}",d);
+    let e = &42;
+    assert_eq!(42, *e); */
 
+    let v = "hello world!";
+    assert_eq!(v, "hello world!");
+    let v = "hello Rust!";
+    assert_eq!(v, "hello Rust!");
+    {
         let v = "hello world!";
         assert_eq!(v, "hello world!");
-        let v = "hello Rust!";
-        assert_eq!(v, "hello Rust!");
-        {
-                let v = "hello world!";
-                assert_eq!(v, "hello world!");
-        }
-        assert_eq!(v, "hello Rust!");
-}*/
-/*pub fn math(op: fn(i32, i32) ->i32, a:i32, b:i32) -> i32 {
-        op(a, b)
+    }
+    assert_eq!(v, "hello Rust!");
+} */
+/* pub fn math(op: fn(i32, i32) -> i32, a: i32, b: i32) -> i32 {
+    op(a, b)
 }
-fn sum(a:i32, b:i32) ->i32{
-        a+b
+fn sum(a: i32, b: i32) -> i32 {
+    a + b
 }
-fn product(a:i32, b:i32) ->i32{
-        a*b
+fn product(a: i32, b: i32) -> i32 {
+    a * b
 }
-fn main(){
-        let a = 3;
-        let b = 2;
-        assert_eq!(math(sum, a, b), 5);
-        assert_eq!(math(product, a, b), 6);
-}*/
+fn main() {
+    let a = 3;
+    let b = 2;
+    assert_eq!(math(sum, a, b), 5);
+    assert_eq!(math(product, a, b), 6);
+} */
 /*fn is_true() -> bool{ true }
 fn true_maker() -> fn() -> bool{is_true}
 fn main() {
-        assert_eq!(true_maker()(), true);
+    assert_eq!(true_maker()(), true);
 }*/
 /*fn math<F:Fn() -> i32>(op:F) ->i32{
-        op()
+    op()
 }
 fn main(){
-        let a = 2;
-        let b = 3;
-        assert_eq!(math(||a+b), 5);
-        assert_eq!(math(||a*b), 6);
+    let a = 2;
+    let b = 3;
+    assert_eq!(math(||a+b), 5);
+    assert_eq!(math(||a*b), 6);
 }*/
 /*fn two_times_impl() -> impl Fn(i32) ->i32{
-        let i = 2;
-        move |j| j*i
+    let i = 2;
+    move |j| j*i
 }
 fn main() {
-        let result = two_times_impl();
-        assert_eq!(result(2), 4);
+    let result = two_times_impl();
+    assert_eq!(result(2), 4);
 }*/
 /*fn main(){
         /*let n = 13;
@@ -247,7 +246,6 @@ fn main() {
         for i in 1..=5{
                 println!("{}",i);
         }*/
-        
         /*let truth: &'static str = "Rust language";
         let ptr = truth.as_ptr();
         let len = truth.len();
@@ -430,7 +428,7 @@ fn main() {
         assert_eq!(fly_dyn(&Duck), true);
 }*/
 /*#[derive(Debug)]
-struct Point{ 
+struct Point{
         x:i32, y:i32,
 }
 fn main() {
@@ -442,7 +440,6 @@ fn main() {
         assert_eq!(x.is_ok(), true);
         let x: Result<i32, &str> = Err("Some error message");
         assert_eq!(x.is_ok(), false);
-        
 }*/
 /*use std::io;
 use std::cmp::Ordering;
@@ -593,7 +590,7 @@ fn first_word(s: &String) -> usize {
         active:bool,
 }
 fn main() {
-        let user1 = build_user(String::from("secondone@example.com"), String::from("Seconduser")); 
+        let user1 = build_user(String::from("secondone@example.com"), String::from("Seconduser"));
         let mut user2 = User{
                 email: String::from("sonmeone@example.com"),
                 username: String::from("someusername"),
@@ -612,7 +609,7 @@ fn build_user(email: String, username: String) -> User {
 } */
 /*#[derive(Debug)]
 struct Rectangle {
-        width: u32, 
+        width: u32,
         height: u32,
 }
 /* fn main() {
@@ -624,10 +621,10 @@ fn area(rectangle: &Rectangle) -> u32 {
         rectangle.width* rectangle.height
 } */
 impl Rectangle{
-        fn area(&self) -> u32{ 
+        fn area(&self) -> u32{
                 return self.width* self.height
         }
-        fn can_hold(&self, other: &Rectangle) -> bool{ 
+        fn can_hold(&self, other: &Rectangle) -> bool{
                 return self.width > other.width && self.height > other.height
         }
         fn square(size: u32) ->Rectangle{
@@ -780,7 +777,7 @@ fn main() {
 /*fn main(){
          for c in  "Здравствуйте".chars(){
                 println!("{:?}", c);
-        } 
+        }
         /*use std::collections::HashMap;
         let mut scores = HashMap::new();
         scores.insert(String::from("Blue"), 10);
@@ -811,7 +808,7 @@ fn main() {
         let mut map = HashMap::new();
         for word in text.split_whitespace(){
                 let count = map.entry(word).or_insert(0);
-                *count +=1; 
+                *count +=1;
         }
         println!("{:?}",map);
 }*/
@@ -878,7 +875,7 @@ fn _read_username_from_file() -> Result<String, io::Error> {
         value: i32,
 }
 impl Guess {
-        pub fn new(value: i32) -> Guess { 
+        pub fn new(value: i32) -> Guess {
                 if value < 1 || value > 100 {
                         panic!("Guess value must be between 1 and 100, got {:?}. ", value);
                 }
@@ -929,11 +926,11 @@ fn largest<T>(list: &[T]) -> T {
         largest
 } */
 /* struct Point<T> {
-        x: T, 
+        x: T,
         y: T,
 }
 struct PointAnyType<U, T> {
-        x: U, 
+        x: U,
         y: T,
 }
 enum _Result<T, E> {
@@ -953,7 +950,7 @@ impl Point<f64> {
 impl<T, U> PointAnyType<T, U> {
         fn mixup<V, W>(self, other: PointAnyType<V, W>) -> PointAnyType<T, W> {
                 PointAnyType {
-                        x: self.x, 
+                        x: self.x,
                         y: other.y,
                 }
         }
@@ -993,7 +990,7 @@ pub struct Tweet {
         pub retweet: bool,
 }
 impl Summary for Tweet {
-        fn summarize_author(&self) -> String { 
+        fn summarize_author(&self) -> String {
                 format!("@{}", self.username)
         }
 } */
@@ -1059,7 +1056,7 @@ fn main() {
 enum Void{}
 struct Foo;
 struct Baz {
-        _foo: Foo, 
+        _foo: Foo,
         _qux: (),
         _baz: [u8; 0],
 }
@@ -1224,7 +1221,7 @@ impl Add for Point {
 fn main() {
         println!("{:?}", Point{x: 5, y: 7} + Point{x: 2, y: 6}); //Point{x: 11, y: 9}
 } */
-/* fn longest<'a >(x: &'a str, y: &'a str) -> &'a str { //生命周期标记 &'a 
+/* fn longest<'a >(x: &'a str, y: &'a str) -> &'a str { //生命周期标记 &'a
         //指定生命周期参数时，并没有改变生命周期，只是向借用检查器指出了可用于检查非法调用的约束
         //泛型生命周期'a会被具体化为x与y两者中较短的那个生命周期
         //返回类型的生命周期参数必须与其中一个参数的生命周期参数相匹配
@@ -1267,5 +1264,107 @@ fn longest_with_an_announcement<'a, T>(x: &'a str, y:&'a str, ann: T) -> &'a str
                 y
         }
 } */
+/* use std::thread;
+use std::time::Duration;
+/* fn simulated_expensive_calculation(intensity: u32) -> u32 {
+        println!("calculating slowly...");
+        thread::sleep(Duration::from_secs(2));
+        intensity
+} */
+struct Cacher<T> where T: Fn(u32) -> u32 {
+        calculation: T, //泛型T由trait约束为Fn trait
+        value: Option<u32>, //value初始化为None，Cacher会运行闭包并将结果存储在value的Some变体中成为缓存，不必重复调用
+}
+impl<T> Cacher<T> where T: Fn(u32) -> u32 {
+        fn new(calculation: T) -> Cacher<T> {
+                Cacher {
+                        calculation,
+                        value: None, //初始化为None
+                }
+        }
+        fn value(&mut self, arg: u32) -> u32 { //先检查是否已经存在Some变体的值，有则直接返回该值，没有则先执行闭包
+                match self.value {
+                        Some(v) => v,
+                        None => {
+                                let v = (self.calculation)(arg);
+                                self.value = Some(v);
+                                v
+                        },
+                }
+        }
+}
 fn main() {
-} 
+        let simulated_user_specified_value = 10;
+        let simulated_random_number = 7;
+        generate_workout(
+                simulated_user_specified_value,
+                simulated_random_number
+        );
+}
+fn generate_workout(intensity: u32, random_number: u32) {
+        //闭包的类型推导仅在第一次就会被绑定，使用其他类型再次调用就会触发错误
+        /* let expensive_closure = |num| {
+                println!("calculating slowly...");
+                thread::sleep(Duration::from_secs(2));
+                num
+        }; */
+        let mut expensive_result = Cacher::new(|num| {
+                println!("calculating slowly...");
+                thread::sleep(Duration::from_secs(2));
+                num
+        });
+        //let expensive_result = simulated_expensive_calculation(intensity);
+        if intensity < 25 {
+                println!("Today, do {} pushups! ", expensive_result.value(intensity));
+                println!(" next, do {} situps! ", expensive_result.value(intensity));
+        } else {
+                if random_number == 3 {
+                        println!("Take a break today! Remember to stay hydrated! ");
+                } else {
+                        println!("Today, run for {} minutes! ", expensive_result.value(intensity));
+                }
+        }
+} */
+/* #[cfg(test)]
+mod tests{
+    #[test]
+    fn call_with_different_values() {
+        let mut c = Cacher::new(|a| a);
+        let v1 = c.value(1);
+        let v2 = c.value(2); //Cacher实例已将Some(1)存在self.value中，无法再改
+        assert_eq!(v2, 2);
+    }
+} */
+/* fn main() {
+    let x = 4;
+    let equal_to_x = |z| z==x; //闭包能够捕获同一作用域中的变量x
+    //fn equal_to_x(z: i32) -> bool { z==x }  //函数则不能，该行代码会报错
+    let y = 4;
+    assert!(equal_to_x(y));
+    let x = vec![1, 2, 3];
+    let equal_to_x = move |z| z==x;
+    //println!("Can't use x here: {:?}", x); move方法使得闭包拥有了x的所有权
+    let y = vec![1, 2, 3];
+    assert!(equal_to_x(y));
+} */
+// 闭包捕获环境中的值有三种方式，与函数相类似，定义在Fn系列的trait中
+//FnOnce 闭包可以从它的封闭作用域中消耗捕获的变量，即所有权发生转移
+//FnMut 可变借用； Fn 不可变借用
+/* pub trait Iterator { //Iterate trait只要求实现者手动定义一个方法： next方法，会在每次被调用时返回一个包裹在Some中的迭代器元素，并在迭代器结束时返回None
+    type Item;
+    fn next(&mut self) -> Option<Self::Item>; //关联类型(associated type)
+}
+fn main(){
+    let v1 = vec![1, 2, 3];
+    let v1_iter = v1.iter();
+    for val in v1_iter {
+        println!("Got: {}", val);
+    }
+} */
+//迭代器适配器方法，可使已有的迭代器转换成其他不同类型的迭代器
+fn main() {
+    let v1: Vec<i32> = vec![1, 2, 3];
+    //v1.iter().map(|x| x+1); //Warning: adaptors are lazy, and do nothing unless consumed.
+    let v2: Vec<_> = v1.iter().map(|x| x + 1).collect(); //调用collect方法将其消耗掉
+    assert_eq!(v2, vec![2, 3, 4]);
+}
