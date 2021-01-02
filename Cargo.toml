@@ -1,6 +1,5 @@
 [package]
 name="instances"
-version="1.48.0"
+version="1.49.0"
 authors=["David Idylle"]
-[dependencies]
-rand = "0.7.3"
+
