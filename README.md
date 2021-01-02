@@ -6,7 +6,7 @@ All the codes comes from the examples in the *The Rust Programming Language* and
 
 
 ### Why I share them...
-I use this repository as a tool to record my codes in learning Rust. You can see it as a diary.
+I use this repository as a tool to record my typing codes in learning Rust. You can see it as a diary.
 
 
 ### Rust...
