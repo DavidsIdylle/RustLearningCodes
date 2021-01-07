@@ -1362,9 +1362,183 @@ fn main(){
     }
 } */
 //迭代器适配器方法，可使已有的迭代器转换成其他不同类型的迭代器
-fn main() {
+/* fn main() {
     let v1: Vec<i32> = vec![1, 2, 3];
     //v1.iter().map(|x| x+1); //Warning: adaptors are lazy, and do nothing unless consumed.
     let v2: Vec<_> = v1.iter().map(|x| x + 1).collect(); //调用collect方法将其消耗掉
     assert_eq!(v2, vec![2, 3, 4]);
+} */
+/* enum List {
+    Cons(i32, Box<List>), //Cons一部分存储i32，另一部分存储装箱指针数据(Box)
+                          //Box实现了Deref trait，可将Box<T>值当作引用来对待；Drop trait，在离开作用域时所指向的堆数据会被自动释放
+    Nil,
+}
+use crate::List::{Cons, Nil};
+fn main(){
+    let list = Cons(1,
+        Box::new(Cons(2,
+            Box::new(Cons(3,
+                Box::new(Nil))))));
+} */
+/* use std::ops::Deref;
+struct MyBox<T>(T);
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+impl<T> Deref for MyBox<T> {
+    type Target = T;  //定义了Deref trait的一个关联类型
+    fn deref(&self) -> &T {
+        &self.0  //返回一个指向值的引用，进而可通过*解引用来访问此值
+    }            //Deref trait 的 deref 方法使编译器可以从任何实现了 Deref 的类型中获取值
+                 //解引用转换：能够将实现了Deref trait的 T 的引用转换为T经过Deref操作后生成的引用
+}
+fn main(){
+    let x = 5;
+    let y = &x;  //y是x的引用
+    assert_eq!(5, x);
+    assert_eq!(5, *y);  //解引用操作符*
+
+    let x = 5;
+    let y = Box::new(x);
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+
+    let x = 5;
+    let y = MyBox::new(5);
+    assert_eq!(5, x);
+    assert_eq!(5, *y);  //隐式展开为*(y.deref())
+    let m = MyBox::new(String::from("Rust"));  //String提供的Deref trait实现会返回字符串切片
+    hello(&m);
+    //如果没有解引用转换功能，则为 hello(&(*m)[..])
+}
+fn hello(name: &str) {
+    println!("Hello, {}! ", name);
+} 
+//解引用转换情形：
+// Deref<Target = U> &T => &U 不可变到不可变
+// DerefMut<Target = U> &mut T => &mut U 可变到可变
+// Deref<Target = U> &mut T => &U 可变到不可变 */
+/* struct CustomSmartPointer {
+    data: String,
+}
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self){
+        println!("Dropping CustomSmartPointer with data '{}' !", self.data);
+    }
+}
+fn main(){
+    let c = CustomSmartPointer{data: String::from("my stuff")};
+    let d = CustomSmartPointer{data: String::from("other stuff")};  //变量丢弃顺序与创建顺序相反
+    println!("CustomSmartPointers created.");
+    //c.drop(); 已经在main函数结束自动调用drop，因此不能再次显式调用drop； drop函数——析构函数(destructor)，与constructor相对应
+    drop(c);
+    println!("CustomSmartPointer dropped before the end of main.");
+} */
+/* enum List {
+    Cons(i32, Rc<List>), //Rc<T>通过不可变引用允许共享只读数据
+    Nil,
+}
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+fn main(){
+    let a = Rc::new(Cons(5,Rc::new(Cons(10,Rc::new(Nil)))));
+    println!("count after creating a = {}", Rc::strong_count(&a)); //Rc::strong_count读取引用计数（强引用计数）
+    let _b = Cons(3, Rc::clone(&a));  //Rc::clone不会执行数据的深度拷贝操作，只会增加引用计数
+    println!("count after creating b = {}", Rc::strong_count(&a));
+    {
+        let _c = Cons(4, Rc::clone(&a));
+        println!("count after creating c = {}", Rc::strong_count(&a));
+    } //Rc<T>的Drop自动实现
+    println!("count after c goes out of scope = {}", Rc::strong_count(&a));
+} */
+//RefCell<T>内部可变性模式，在数据结构中使用了unsafe代码来绕过Rust正常的可变性和借用规则
+//对于RefCell<T>代码，Rust只会在运行时检查这些规则，并在出现违反借用规则情况下触发panic以提前终止
+
+//Rc<T>允许一份数据有多个所有者，而Box<T>和RefCell<T>都只有一个所有者
+//Box<T>允许在编译时检查的可变或不可变借用；Rc<T>仅允许编译时检查的不可变借用；RefCell<T>允许运行时检查的可变或不可变借用
+//RefCell<T>本身不可变，但允许在运行时检查可变借用：内部可变性模式允许用户更改一个不可变值的内部数据
+
+/* #[derive(Debug)]
+enum List {
+    Cons(Rc<RefCell<i32>>, Rc<List>), // List保持了表面的不可变状态，且能够在必要时借RefCell<T>来修改内部存储的数据
+    Nil,
+}
+use crate::List::{Cons, Nil};
+use std::rc::Rc;
+use std::cell::RefCell;
+fn main(){
+    let value = Rc::new(RefCell::new(5));
+    let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+    let b = Cons(Rc::new(RefCell::new(6)), Rc::clone(&a));
+    let c = Cons(Rc::new(RefCell::new(10)), Rc::clone(&a));
+    *value.borrow_mut() += 10;  // borrow_mut会返回一个RefMut<T>智能指针
+    println!("a after = {:?}", a);
+    println!("b after = {:?}", b);
+    println!("c after = {:?}", c);
+} */
+/* use std::rc::Rc;
+use std::cell::RefCell;
+use crate::List::{Cons, Nil};
+#[derive(Debug)]
+enum List {
+    Cons(i32, RefCell<Rc<List>>), // 可以灵活修改Cons变体指向的下一个List值
+    Nil,
+}
+impl List {
+    fn tail(&self) -> Option<&RefCell<Rc<List>>> {
+        match self {
+            Cons(_, item) => Some(item),
+            Nil => None,
+        }
+    }
+}
+fn main() {
+    let a = Rc::new(Cons(5, RefCell::new(Rc::new(Nil))));
+    println!("a initial rc count = {}", Rc::strong_count(&a));
+    println!("a next item = {:?}", a.tail());
+
+    let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&a))));
+    println!("a rc count after b creation = {}", Rc::strong_count(&a));
+    println!("b initial rc count = {}", Rc::strong_count(&b));
+    println!("b next item = {:?}", b.tail()); //调用tail方法来得到a的RefCell<Rc<List>>值的引用并暂存至link变量中
+
+    if let Some(link) = a.tail() {
+        *link.borrow_mut() = Rc::clone(&b); //将Rc<List>中存储的值由Nil修改为b中存储的Rc<List>
+    }
+
+    println!("b rc count after changing a = {}", Rc::strong_count(&b));
+    println!("a rc count agter changing a = {}", Rc::strong_count(&a)); //由于a仍然持有一个指向b中Rc<List>的引用，所以引用计数仍为1，Rc<List>在堆上的内存不会得到释放
+    //println!("a next item - {:?}", a.tail()); //循环引用，会造成栈的溢出
+} */
+use std::rc::{Rc, Weak};
+use std::cell::RefCell;
+#[derive(Debug)]
+struct Node {
+    value:i32,
+    parent: RefCell<Weak<Node>>,  //子节点可以指向父节点却不持有它的所有权
+    children: RefCell<Vec<Rc<Node>>>,  //持有自身所有的子节点并通过变量来共享它们的所有权
+}
+fn main() {
+    let leaf = Rc::new(Node{
+        value: 3,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![]),
+    });
+    println!("leaf strong = {}, weak = {}", Rc::strong_count(&leaf), Rc::weak_count(&leaf)); //leaf强引用计数为1，弱引用计数为0
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());  //使用upgrade方法获得指向leaf父节点的引用
+    {
+        let branch = Rc::new(Node{
+        value: 5,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![Rc::clone(&leaf)]),  // leaf的Node分别拥有了leaf和branch两个所有者。可以使用branch.leaf来从branch访问leaf
+    });
+    *leaf.parent.borrow_mut() = Rc::downgrade(&branch); //borrow_mut方法取出leaf中parent字段的可变借用，
+                                                        //Rc::downgrade函数获取branch中Rc<Node>的Weak<Node>引用并存入leaf的parent字段中
+    println!("branch strong = {}, weak = {}", Rc::strong_count(&branch), Rc::weak_count(&branch)); //branch中Rc<Node>的强引用计数为1，若引用计数为1
+    println!("leaf strong = {}, weak = {}", Rc::strong_count(&leaf), Rc::weak_count(&leaf)); //leaf的强引用计数为2， 弱引用仍为0
+    }
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade()); //包含了branch实际内容的Some变体，在作用域结束后访问会得到None值
+    println!("leaf strong = {}, weak = {}", Rc::strong_count(&leaf), Rc::weak_count(&leaf)); //只有leaf变量指向了存储在自身中的Rc<Node>，所以其强引用计数为1
 }

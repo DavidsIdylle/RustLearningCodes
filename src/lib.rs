@@ -2,7 +2,7 @@
 //! 
 //! 一个用以建立艺术概念的代码库
 //！
-pub use self::kinds::PrimaryColor;
+/* pub use self::kinds::PrimaryColor;
 pub use self::kinds::SecondaryColor;
 pub use self::utils::mix;
 
@@ -21,9 +21,9 @@ pub mod utils {
     use crate::kinds::*;
     ///将两种等量的原色混合生成调和色
     pub fn mix(c1: PrimaryColor, c2: PrimaryColor) -> SecondaryColor {
-
+        
     }
-}
+} */
 /* mod front_of_house {
     pub mod hosting {
         pub fn add_to_waitlist() {}
@@ -164,7 +164,7 @@ fn filters_by_size() {
         ]
     );
 } */
-struct Counter {
+/* struct Counter {
     count: u32,
 }
 impl Counter {
@@ -199,8 +199,8 @@ fn using_other_iterator_trait_methods() {
     let sum: u32 = Counter::new().zip(Counter::new().skip(1)).map(|(a, b)| a*b).filter(|x| x%3 == 0).sum();
     //zip方法只会产生4对值，在两个迭代器中的任意一个返回None时结束迭代
     assert_eq!(18, sum);
-}
-
+} */
+/* 
 /// 将传入的数字加1
 /// 
 /// # Example
@@ -213,8 +213,67 @@ fn using_other_iterator_trait_methods() {
 /// ```
 pub fn add_one(x: i32) -> i32 {
     x + 1
-}
+} */
 //cargo doc文档场景
 //Panics：函数可能引发panic的场景
 //Errors：返回Result作为结果时，指出可能出现的错误及具体原因
 //Safety：函数使用了unsafe关键字，指出当前函数不安全的原因
+/* pub trait Messeger {
+    fn send(&self, msg: &str); //接收self的不可变引用及一条文本消息作为参数
+}
+pub struct LimitTracker<'a, T: 'a + Messeger>{
+    messeger: &'a T,
+    value: usize,
+    max: usize,
+}
+impl<'a, T> LimitTracker<'a, T> where T: Messeger {
+    pub fn new(messeger: &T, max: usize) -> LimitTracker<T> {
+        LimitTracker{
+            messeger,
+            value: 0,
+            max,
+        }
+    }
+    pub fn set_value(&mut self, value: usize) {
+        self.value = value;
+        let percentage_of_max = self.value as f64 / self.max as f64;
+        if percentage_of_max >= 1.0{
+            self.messeger.send("Error: You are over your quota!");
+        } else if percentage_of_max >= 0.9{
+            self.messeger.send("Urgent warning: You've used up over 90% of your quota!");
+        } else if percentage_of_max >= 0.75{
+            self.messeger.send("Warning: You've used up over 75% of your quota!");
+        }
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::cell::RefCell;
+    struct MockMessenger {
+        sent_messages: RefCell<Vec<String>>, //用携带String值的动态数组来记录所有接收到的消息
+        // RefCell<T>会记录Ref<T>和RefMut<T>个数，借用规则不变：只允许多个不可变借用或一个可变借用
+    }
+    impl MockMessenger {
+        fn new() -> MockMessenger {
+            MockMessenger { sent_messages: RefCell::new(vec![]) }
+        }
+    }
+    impl Messeger for MockMessenger {
+        fn send(&self, message: &str) {
+            self.sent_messages.borrow_mut().push(String::from(message)); //在send方法定义中，参数中的消息文本会被存入sent_messages中
+            // borrow返回Ref<T>; borrow_mut返回RefMut<T>
+            /* let mut one_borrow = self.sent_messages.borrow_mut();
+            let mut two_borrow = self.sent_messages.borrow_mut();
+            one_borrow.push(String::from(message));
+            two_borrow.push(String::from(message)); */ //多次可变借用，可以顺利通过编译，但会在测试运行时运行失败
+        }
+    }
+    #[test]
+    fn it_sends_an_over_75_percent_warning_message(){
+        let mock_messenger = MockMessenger::new();
+        let mut limit_tracker = LimitTracker::new(&mock_messenger, 100);
+        limit_tracker.set_value(80);
+        assert_eq!(mock_messenger.sent_messages.borrow().len(), 1);
+    }
+} */
