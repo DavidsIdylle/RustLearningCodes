@@ -1512,7 +1512,7 @@ fn main() {
     println!("a rc count agter changing a = {}", Rc::strong_count(&a)); //由于a仍然持有一个指向b中Rc<List>的引用，所以引用计数仍为1，Rc<List>在堆上的内存不会得到释放
     //println!("a next item - {:?}", a.tail()); //循环引用，会造成栈的溢出
 } */
-use std::rc::{Rc, Weak};
+/* use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 #[derive(Debug)]
 struct Node {
@@ -1541,4 +1541,175 @@ fn main() {
     }
     println!("leaf parent = {:?}", leaf.parent.borrow().upgrade()); //包含了branch实际内容的Some变体，在作用域结束后访问会得到None值
     println!("leaf strong = {}, weak = {}", Rc::strong_count(&leaf), Rc::weak_count(&leaf)); //只有leaf变量指向了存储在自身中的Rc<Node>，所以其强引用计数为1
+} */
+/* 不同线程在执行过程中的具体顺序无法确定，所以：
+*当多个线程以不一致的顺序访问数据或资源时产生的竞争状态
+*两个线程同时尝试获取对方持有的资源时产生的死锁
+*特定情况下出现且难以稳定重现和修复的bug
+*/
+//use std::thread;
+/* use std::time::Duration;
+fn main() {
+    let handle = thread::spawn(|| { //thread::spawn返回类型是一个自持有所有权的JoinHandle
+        for i in 1..10{
+            println!("Hi number {} from the spawned thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+    // handle.join().unwrap(); //主线程会等待新线程提前执行完毕后才开始执行自己的for循环
+    for i in 1..5{
+        println!("Hi number {} from the main thread!", i);
+        thread::sleep(Duration::from_millis(1));
+    }
+    handle.join().unwrap(); //在线程句柄上调用join函数会阻塞当前线程，直到句柄对应的新线程运行结束
+} */
+//use std::sync::mpsc; //multiple producer, single consumer(多个生产者，单个消费者)
+/* fn main() {
+    let v = vec![1, 2, 3];
+    let handle = thread::spawn(move || {      //闭包前添加move关键字，可以强制闭包获得它所需值的所有权
+        println!("Here's a vector: {:?}", v); //由于Rust不知道新线程会运行多久，因此无法确定v的引用一直有效
+    });
+    //drop(v);  //move将v移动到了闭包环境中，所以无法在主线程中继续使用它来调用drop函数
+    handle.join().unwrap();
+} */
+//use std::time::Duration;
+/* fn main() {
+    let (tx, rx) = mpsc::channel();
+    thread::spawn(move || {  //使用move关键字将tx移动到新线程中
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("thread"),
+        ];
+        for val in vals {
+            tx.send(val).unwrap();  //send方法会返回Result<T,E>类型，使用unwrap()来触发panic
+            //println!("val is {}", val); //所有权已被转移给接收者
+            thread::sleep(Duration::from_secs(1)); //新线程中将数据发送至主线程，并调用Duration值来稍作暂停
+        }      
+    });
+    for received in rx{
+        println!("Got: {}", received);  //主线程中rx被视为迭代器
+    }
+    //let received = rx.recv().unwrap();  //recv会将传入值包裹在Result<T,E>中返回
+    //recv会阻塞主线程的执行直到有值被传入通道；try_recv方法不会阻塞线程，会立即返回Result<T,E>
+    //println!("Got: {}", received);
+} */
+/* fn main() {
+    let (tx,rx) = mpsc::channel();
+    let tx1 = mpsc::Sender::clone(&tx);  //clone生成可以传入新线程的发送端句柄
+    thread::spawn(move || {   //clone得到的发送端句柄传入第一个新线程
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("thread"),
+        ];
+        for val in vals {
+            tx1.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+    thread::spawn(move || {   //原始通道发送端传入第二个新线程
+        let vals = vec![
+            String::from("more"),
+            String::from("messages"),
+            String::from("for"),
+            String::from("you"),
+        ];
+        for val in vals {
+            tx.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+    for received in rx {
+        println!("Got: {}", received);
+    }
+} */
+// 互斥体 mutex（mutual exclusion）一个互斥体在任意时刻只允许一个线程访问数据
+// 互斥体包含包含锁，以记录当前谁拥有数据的唯一访问权
+// *必须在使用数据前尝试获取锁
+// *必须在使用完互斥体守护的数据后释放锁
+//use std::sync::Mutex;
+/* fn main() {
+    let m = Mutex::new(5);
+    {
+        let mut num = m.lock().unwrap();  //阻塞方式获取锁，unwrap以触发panic
+        *num = 6;  //其返回值将视为指向内部数据的可变引用
+                   //Mutex<T>的lock方法调用会返回一个名为MutexGuard的智能指针
+                   //这个智能指针通过Deref指向存储在其内部的数据，Drop实现自动解锁
+    }
+    println!("m = {:?}", m);
+} */
+/* use std::thread;
+use std::rc::Rc;  //Rc<T>在跨线程使用时并不安全。虽然可以实现引用计数，但没有使用人格并发原语来保证修改计数的过程不会被另一个线程所打断
+fn main() {
+    let counter = Rc::new(Mutex::new(0));   //Rc<T>包裹Mutex<T>，并在每次需要移动所有权至线程时克隆Rc<T>
+    let mut handles = vec![];
+    for _ in 0..10 {
+        let counter = Rc::clone(&counter);  //Rc<T>无法安全地在线程间传递，即该类型不满足Send trait约束
+        let handle = thread::spawn(move || {       //通过迭代创建出10个线程
+            let mut num = counter.lock().unwrap(); //闭包会把计数器移入线程中，并调用Mutex<T>的lock方法来进行加锁并为其值加1
+            *num += 1;                             //counter的所有权被移动到多个线程中，这是不允许的，应用多重所有权来解决
+        });
+        handles.push(handle);
+    }
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    println!("Result: {}", *counter.lock().unwrap());
+} */
+/* use std::sync::{Mutex, Arc};  //Arc<T> 原子引用计数，和原生类型的用法十分相似，且可以在多个线程间安全共享
+                              //接口与Rc<T>一致，但其代价是一定的性能开销
+use std::thread;
+fn main() {
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+    for _ in 0..10 {
+        let counter = Arc::clone(&counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+            *num += 1;
+        });
+        handles.push(handle);
+    }
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    println!("Result: {:?}", *counter.lock().unwrap());
+} */
+// RefCell<T> / Rc<T> 和 Mutex<T> / Arc<T> 之间的相似性
+// Rc<T>循环指向时会造成内存泄漏；Mutex<T>也会有产生死锁的风险
+
+//std::marker模块内的Sync trait和Send trait
+//只有实现了Send trait才能安全地在线程间转移所有权
+//只有实现了Sync trait才能安全地被多个线程引用：RefCell<T> Cell<T> Rc<T>都不满足Sync约束
+pub struct AveragedCollection {
+    list: Vec<i32>,
+    average: f64,
 }
+impl AveragedCollection {
+    pub fn add(&mut self, value: i32) {
+        self.list.push(value);
+        self.update_average();
+    }
+    pub fn remove(&mut self) -> Option<i32> {
+        let result = self.list.pop();
+        match result {
+            Some(value) => {
+                self.update_average();
+                Some(value)
+            },
+            None => None,
+        }
+    }
+    pub fn average(&self) -> f64 {  //average方法读取average字段值，但不能修改
+        self.average
+    }
+    // 公共方法add、remove和average
+    fn update_average(&mut self) {  // add 和 remove 会调用update_average来更新average字段
+        let total: i32 = self.list.iter().sum();
+        self.average = total as f64 / self.list.len() as f64;
+    }  
+}
+fn main() {}
