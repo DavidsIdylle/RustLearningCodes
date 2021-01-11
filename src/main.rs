@@ -1684,7 +1684,7 @@ fn main() {
 //std::marker模块内的Sync trait和Send trait
 //只有实现了Send trait才能安全地在线程间转移所有权
 //只有实现了Sync trait才能安全地被多个线程引用：RefCell<T> Cell<T> Rc<T>都不满足Sync约束
-pub struct AveragedCollection {
+/* pub struct AveragedCollection {
     list: Vec<i32>,
     average: f64,
 }
@@ -1711,5 +1711,5 @@ impl AveragedCollection {
         let total: i32 = self.list.iter().sum();
         self.average = total as f64 / self.list.len() as f64;
     }  
-}
+} */
 fn main() {}
