@@ -1642,7 +1642,8 @@ fn main() {
     println!("m = {:?}", m);
 } */
 /* use std::thread;
-use std::rc::Rc;  //Rc<T>在跨线程使用时并不安全。虽然可以实现引用计数，但没有使用人格并发原语来保证修改计数的过程不会被另一个线程所打断
+use std::rc::Rc;  //Rc<T>在跨线程使用时并不安全。
+                  //虽然可以实现引用计数，但没有使用人格并发原语来保证修改计数的过程不会被另一个线程所打断
 fn main() {
     let counter = Rc::new(Mutex::new(0));   //Rc<T>包裹Mutex<T>，并在每次需要移动所有权至线程时克隆Rc<T>
     let mut handles = vec![];
@@ -1915,4 +1916,267 @@ fn main() {
         },
     }
 } */
+
+//unsafe superpower 不安全超能力：unsafe关键字允许的四种操作
+//解引用裸指针
+    //两种裸指针：*const T和*mut T（*是类型名的一部分而非解引用操作）
+    //允许忽略借用规则，可以同时拥有指向同一个内存地址的可变和不可变指针，或者拥有指向同一个地址的多个可变指针
+    //不能保证自己总是指向了有效的内存地址
+    //允许为空
+    //没有实现任何自动清理机制
+/* fn main() {
+    let mut num = 5;
+    let r1 = &num as *const i32; //可以在安全代码内合法创建裸指针，但不能解引用
+    let r2 = &mut num as *mut i32;
+    unsafe{  //在unsafe块中解引用裸指针
+        println!("r1 is {}", *r1);
+        println!("r2 is {}", *r2);
+    }
+    let address = 0x012345usize;
+    let _r = address as *const i32; //指向内存中任意地址的裸指针
+} */
+//调用不安全的函数或方法
+/* unsafe fn dangerous() {} //不安全函数的函数体也是unsafe代码块
+use std::slice;
+fn split_at_mut(slice: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
+    let len = slice.len();  //得到切片的长度
+    let ptr = slice.as_mut_ptr();  //返回类型为*mut i32的裸指针
+    assert!(mid <= len); //通过断言，确保unsafe中裸指针都会指向有效的切片数据，且不会产生任何的数据竞争
+    unsafe {
+        (slice::from_raw_parts_mut(ptr, mid),  //接收一个裸指针和长度来创建一个切片
+        slice::from_raw_parts_mut(ptr.offset(mid as isize), len - mid) //使用mid参数调用offset方法得到从mid开始的裸指针
+        )
+    }
+    //(&mut slice[..mid], &mut slice[mid..])  //元组不能同时被可变借用两次
+}
+fn main() {
+    unsafe {
+        dangerous(); //需要单独在unsafe代码块中调用dangerous函数
+    }
+    let mut v = vec![1, 2, 3, 4, 5, 6];
+    let r = &mut v[..];
+    let (a, b) = r.split_at_mut(3); //在实现时以安全方式使用了unsafe代码
+    assert_eq!(a, &mut [1, 2, 3]);
+    assert_eq!(b, &mut [4, 5, 6]);
+}
+extern "C" { //C指明了外部函数使用的应用二进制接口ABI
+    fn abs(input: i32) -> i32;
+}
+fn main() {
+    unsafe {
+        println!("Absolute value of -3 according to C:{}", abs(-3));
+    }
+} */
+/* #[no_mangle]  //可以在编译并链接后被C语言代码访问的函数
+pub extern "C" fn call_from_c() {
+    println!("Just called a Rust function from C!");
+} */
+//访问或修改可变的静态变量
+/* static HELLO_WORLD: &str = "Hello, world! ";  //静态变量只能存储拥有'static生命周期的引用
+//静态变量的值在内存中拥有固定的地址；常量允许在任何被使用到的时候复制其数据
+static mut COUNTER: u32 = 0;  //访问和修改可变静态变量是不安全的
+fn add_to_count(inc: u32) {
+    unsafe {
+        COUNTER += inc;
+    }
+}
+fn main() {
+    println!("name is :{}", HELLO_WORLD);
+    add_to_count(3);
+    unsafe {
+        println!("COUNTER: {}", COUNTER);  //单线程，若有多个线程同时访问COUNTER时，则可能会出现数据竞争
+    }
+} */
+//实现不安全trait
+    //trait中存在至少一个方法拥有编译器无法校验的不安全因素
+/* unsafe trait Foo{
+    //某些方法
+}
+unsafe impl Foo for i32 {
+    //对应的方法实现
+} */
+//在trait的定义中使用关联类型指定占位类型
+/* pub trait Iterator {  //关联类型，不需要再使用该trait时标注类型，
+                      //只能实现一次impl Iterator for _ 操作，即 _ 只能拥有一个特定的Item类型
+    type Item;  //占位类型，trait的实现者需要为Item指定具体的类型，并在next方法中返回包含该类型的Option<T>
+    fn next(&mut self) -> Option<Self::Item>;
+} */
+/* pub trait Iterator<T> {  //泛型需要在每次实现该trait时标注类型，且next方法也必须提供类型标注
+                            //impl Iterator for _ , 则 _ 可以拥有一个类型的不同trait实现
+    fn next(&mut self) -> Option<T>;
+}
+ */
+//使用泛型参数时为其指定默认的具体类型，常用于运算符重载中
+    //允许扩展一个类型而不破坏现有代码
+    //允许在特定场合进行自定义
+/* use std::ops::Add;
+#[derive(Debug, PartialEq)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+struct Millimeters(u32);
+struct Meters(u32);
+impl Add<Meters> for Millimeters { //指定Meter为Add trait的RHS类型参数的值
+    type Output = Millimeters;
+    fn add(self, other: Meters) -> Millimeters {
+        Millimeters(self.0 + (other.0 * 1000))
+    }
+}
+/* trait Add<RHS = Self> {  //RHS=Self即默认类型参数
+    type Output;
+    fn add(self, rhs: RHS) -> Self::Output;
+} */
+impl Add for Point {
+    type Output = Point;  //add trait拥有一个Output的关联类型，用以确定add方法的返回类型
+    fn add(self, other: Point) -> Point {
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+fn main() {
+    assert_eq!(Point {x: 1, y: 0} + Point {x: 2, y: 3},
+    Point {x: 3, y: 3});
+} */
+//完全限定语法：调用相同名称的方法
+    //Rust不会阻止两个trait拥有相同名称的方法，也不会阻止你为同一个类型实现这样的两个trait
+/* trait Pilot {
+    fn fly(&self);
+}
+trait Wizard {
+    fn fly(&self);
+}
+struct Human;
+impl Pilot for Human {
+    fn fly(&self) {
+        println!("This is your captain speaking.");
+    }
+}
+impl Wizard for Human {
+    fn fly(&self) {
+        println!("Up!");
+    }
+}
+impl Human {
+    fn fly(&self) {
+        println!("*waving arms furiously*");
+    }
+}
+fn main() {
+    let person = Human;
+    Pilot::fly(&person);
+    Wizard::fly(&person); //在方法前指定trait名称可以清晰表明调用的具体fly实现
+    person.fly();
+} */
+/* trait Animal {
+    fn baby_name() -> String;
+}
+struct Dog;
+impl Dog {
+    fn baby_name() -> String {
+        String::from("Spot")
+    }
+}
+impl Animal for Dog {
+    fn baby_name() -> String {
+        String::from("puppy")
+    }
+}
+fn main() {
+    println!("A baby dog is called a {}", Dog::baby_name());
+    //println!("A baby dog is called a {}", Animal::baby_name()); 
+    //没有self参数的关联函数，所以无法推断它的具体实现
+    //完全限定语法形式：
+    //<Type as Trait>::function(receiver_if_method, next_arg, ...);
+    println!("A baby dog is called a {}", <Dog as Animal>::baby_name());
+} */
+//超trait：在trait中附带另一个trait功能
+/* use std::fmt;
+struct Point {
+    x: i32,
+    y: i32,
+}
+impl fmt::Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+//Outline_print必须注明自己只能用于提供了Display功能的类型
+trait OutlinePrint: fmt::Display { //依赖于Display trait，因此能够使用to_string函数
+    fn outline_print(&self) {
+        let output = self.to_string();
+        let len = output.len();
+        println!("{}", "*".repeat(len+4));
+        println!("*{}*", " ".repeat(len+2));
+        println!("* {} *", output);
+        println!("*{}*", " ".repeat(len+2));
+        println!("{}", "*".repeat(len+4));
+    }
+} */
+//newtype模式在外部类型上实现外部trait
+/* use std::fmt;
+struct Wrapper(Vec<String>);  //创建一个持有Vec<T>实例的Wrapper结构体，为其实现Display 
+impl fmt::Display for Wrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}]", self.0.join(", "))  //self.0来访问Vec<T>
+    }
+}
+fn main() {
+    let w = Wrapper(vec![String::from("hello"),String::from("world")]);
+    println!("w = {}", w);
+} */
+//newtype模式实现类型安全与抽象
+    //静态地保证各种值之间不会被混淆及表明值使用的单位
+    //为类型的某些细节提供抽象能力
+    //隐藏内部的实现细节
+//使用类型别名创建同义类型
+/* fn main(){
+    type Kilometers = i32;  //同义，但并不认为是新类型，
+                            //因此无法享有newtype模式附带的类型检查便利
+    let x: i32 = 5;
+    let y: Kilometers = 5;
+    println!("x + y = {}", x+y);
+    type Thunk = Box<dyn Fn() + Send + 'static>;  //减少字符重复性
+    let f: Thunk = Box::new(|| println!("hi"));
+    fn takes_long_type(f: Thunk){}
+    fn returns_long_type() -> Thunk {
+        Box::new(|| ())
+    }
+}
+use std::io::*; //type Result<T> = Result<T, std::io::Error>; 
+use std::fmt;
+pub trait Write {
+    fn write(&mut self, buf: &[u8]) -> Result<usize>;
+    fn flush(&mut self) -> Result<()>;
+    fn write_all(&mut self, buf: &[u8]) -> Result<()>;
+    fn write_fmt(&mut self, fmt: fmt::Arguments) ->Result<()>;
+} */
+//永不返回的Never类型
+    //不会返回值的函数也被称作发散函数
+/* fn main() {
+    let guess = match guess.trim().parse() {
+        Ok(_) => 5,  //将u32作为guess的类型，或者!可以被强制转换成其他任意类型
+        Err(_) => continue, //continue的返回值是！，即Never类型
+    };
+}
+//panic!宏定义也使用了Never类型
+//panic!只会中断当前程序而不会产生值
+impl<T> Option<T> {
+    pub fn unwrap(self) -> T {
+        match self {  //整个match表达式返回类型为T
+            Some(val) => val,
+            None => panic!("Called 'Option::unwrap()' on a 'None' value"),
+        }
+    }
+} */
+//loop返回类型也为!
+//动态大小类型和sized trait
+    //&T被视为存储了T所在内存地址的单个值，但&str实际上由str的地址及其长度组成
+    //trait也是可以通过其名称来进行引用的动态大小类型
+    //Sized trait可确定一个类型的大小在编译时是否可知
+//fn generic<T: Sized>(t: T) {} //为每个泛型函数隐式添加Sized约束
+//fn generic<T: ?Sized>(t: &T) {} //表达了与Sized相反的含义
+                                  //类型可能不是Sized的，因此需要将t放置在某种指针之后
 fn main() {}
