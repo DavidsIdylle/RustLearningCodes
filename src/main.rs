@@ -2179,4 +2179,64 @@ impl<T> Option<T> {
 //fn generic<T: Sized>(t: T) {} //为每个泛型函数隐式添加Sized约束
 //fn generic<T: ?Sized>(t: &T) {} //表达了与Sized相反的含义
                                   //类型可能不是Sized的，因此需要将t放置在某种指针之后
-fn main() {}
+
+/* fn add_one(x: i32) -> i32 {
+    x + 1
+}
+fn do_twice(f: fn(i32) -> i32, arg: i32) -> i32 { //参数被指定为fn类型，且fn以i32为参数类型
+    f(arg) + f(arg)
+}
+fn main() {
+    let answer = do_twice(add_one, 5); 
+    println!("The answer is {}", answer);
+    let list_of_numbers = vec![1, 2, 3];
+    let list_of_strings: Vec<String> = list_of_numbers.iter().map(|i| i.to_string()).collect();    //闭包
+    let list_of_strings: Vec<String> = list_of_numbers.iter().map(ToString::to_string).collect();  //to_string()函数
+    enum Status {
+        Value(u32),
+        Stop,
+    }
+    let list_of_statuses: Vec<Status> = (0u32..20).map(Status::Value).collect();  
+    //Status::Value构造器调用map方法，为范围内每个值都创建了对应的Status::Value实例
+    /* fn returns_closure() -> Fn(i32) -> i32 {  //不能将函数指针fn作为返回类型
+                                                 //Rust无法推断闭包返回所需的存储空间
+        |x| x+1
+    } */
+    fn returns_closure() -> Box<dyn Fn(i32) -> i32> {  //使用trait对象
+        Box::new(|x| x+1)
+    }
+} */
+//元编程范式：宏，macro_rules!构造的声明宏及3种过程宏
+    //用于结构体或枚举的自定义#[derive]宏，可以指定随derive属性自动添加的代码
+    //用于为任意条目添加自定义属性的属性宏
+    //看起来类似于函数的函数宏，可以接收并处理一段标记序列
+//macro_rules!声明宏，也被称为“模板宏”
+    //会将传递给宏的的字面Rust源代码，与可用于匹配源代码的结构进行比较
+    //匹配成功则该分支下的代码会被用以替换传入宏的代码
+#[macro_export]
+macro_rules! vec { //vec即为宏的名称（不带!）
+    ( $( $x:expr ),* ) => {  //类似于match表达式的结构
+                             //此处只存在一种有效的匹配方法，其他模式都会导致编译错误
+        {  //宏的模式匹配的是Rust的代码结构，因此语法不同 $x: expr 可以匹配任意的Rust表达式
+           //$() 之后的逗号意味着可能的字面逗号分隔符会出现在捕获代码的后面，
+           //而逗号之后的*则意味着这个模式能够匹配零个或多个*之前的东西
+            let mut temp_vec = Vec::new();
+            $ (
+                temp_vec.push($x);  //
+            )*
+            temp_vec
+        }
+    }
+}
+// vec![1, 2, 3]
+/* let mut temp_vec = Vec::new();
+temp_vec.push(1);
+temp_vec.push(2);
+temp_vec.push(3);
+temp_vec */
+//过程宏
+/* use proc_macro;
+#[some_attribute]  //some_attribute用于指定过程宏类型的占位符
+pub fn some_name(input: TokenStream) -> TokenStream {} */
+
+fn main(){}
